@@ -77,8 +77,7 @@ def update_city(city_id):
         abort(400, "Missing name")
     city = storage.get(City, city_id)
     for k, v in data.items():
-        if k != "id" and k != "created_at"\
-           and k != "updated_at" and k != "state_id":
+        if k not in ["id", "created_at", "updated_at", "state_id"]:
             setattr(city, k, v)
     city.save()
     return jsonify(city.to_dict()), 200
