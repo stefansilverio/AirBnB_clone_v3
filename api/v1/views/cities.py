@@ -15,9 +15,10 @@ import json
                  methods=['GET'])
 def all_cities(state_id):
     """grab all cities in a state"""
-    if "State" + '.' + state_id not in storage.all("State").keys():
+    state = storage.get("State", state_id)
+    if state is None:
         abort(404)
-    cities = storage.all(City).values()
+    cities = storage.all("City").values()
     obj = [city.to_dict() for city in cities if city.state_id == state_id]
     return jsonify(obj)
 
@@ -25,20 +26,19 @@ def all_cities(state_id):
 @app_views.route("/cities/<city_id>", strict_slashes=False, methods=['GET'])
 def get_city_obj(city_id):
     """retrieve city obj"""
-    cities = storage.all("City").values()
-    obj = [city.to_dict() for city in cities if city.id == city_id]
-    if len(obj) == 0:
+    city = storage.get("City", city_id)
+    if city is None:
         abort(404)
-    return jsonify(obj)
+    return jsonify(city.to_dict())
 
 
 @app_views.route("/cities/<city_id>", strict_slashes=False, methods=['DELETE'])
 def delete_city(city_id):
     """delete a city"""
-    obj = storage.get("City", city_id)
-    if obj is None:
+    city = storage.get("City", city_id)
+    if city is None:
         abort(404)
-    storage.delete(obj)
+    storage.delete(city)
     storage.save()
     return jsonify({}), 200
 
@@ -58,8 +58,7 @@ def create_city(state_id):
         abort(400, "Missing name")
     new_city = City(**data)
     setattr(new_city, 'state_id', state_id)
-    storage.new(new_city)
-    storage.save()
+    new_city.save()
     return jsonify(new_city.to_dict()), 201
 
 
@@ -68,14 +67,14 @@ def create_city(state_id):
                  methods=['PUT'])
 def update_city(city_id):
     """create or update: idempotent"""
+    city = storage.get("City", city_id)
+    if city is None:
+        abort(404)
     data = request.get_json()
     if data is None:
         abort(400, "Not a JSON")
     if 'name' not in data.keys():
         abort(400, "Missing name")
-    city = storage.get("City", city_id)
-    if city is None:
-        abort(404)
     city = storage.get(City, city_id)
     for k, v in data.items():
         if k != "id" and k != "created_at"\
