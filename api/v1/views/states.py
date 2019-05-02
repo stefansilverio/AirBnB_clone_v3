@@ -11,16 +11,20 @@ from os import getenv
                  defaults={"state_id": None},
                  strict_slashes=False,
                  methods=['GET'])
-@app_views.route("/states/<state_id>", strict_slashes=False, methods=['GET'])
+@app_views.route("/states/<state_id>",
+                 strict_slashes=False,
+                 methods=['GET'])
 def state_get(state_id):
     """Handle GET request for states"""
+    states = storage.all("State")
+    stateGet = storage.get("State", state_id)
     if state_id is None:
         return jsonify(
-            [state.to_dict() for state in storage.all("State").values()]
+            [state.to_dict() for state in states.values()]
         )
-    elif "State" + '.' + state_id in storage.all("State").keys():
+    elif stateGet is not None:
         return jsonify(
-            storage.get("State", state_id).to_dict()
+            stateGet.to_dict()
         )
     else:
         abort(404)
@@ -31,15 +35,18 @@ def state_get(state_id):
                  methods=['DELETE'])
 def state_delete(state_id):
     """Handles DELETE request with state objects"""
-    if "State" + '.' + state_id in storage.all("State").keys():
-        storage.delete(storage.all("State")['State' + '.' + state_id])
+    stateGet = storage.get("State", state_id)
+    if stateGet is not None:
+        storage.delete(stateGet)
         storage.save()
-        return jsonify({})
+        return jsonify({}), 200
     else:
         abort(404)
 
 
-@app_views.route("/states", strict_slashes=False, methods=['POST'])
+@app_views.route("/states",
+                 strict_slashes=False,
+                 methods=['POST'])
 def state_post():
     """Handles POST request with state objects"""
     data = request.get_json()
@@ -47,9 +54,8 @@ def state_post():
         abort(400, 'Not a JSON')
     if 'name' not in data.keys():
         abort(400, 'Missing name')
-    new_state = State(**(request.get_json()))
-    storage.new(new_state)
-    storage.save()
+    new_state = State(**(data))
+    new_state.save()
     return jsonify(new_state.to_dict()), 201
 
 
@@ -58,17 +64,14 @@ def state_post():
                  methods=['PUT'])
 def state_put(state_id):
     """Handles PUT request with state object with state id"""
-    objDict = request.get_json()
-    if objDict is None:
+    data = request.get_json()
+    if data is None:
         abort(400, 'Not a JSON')
-    stateObj = storage.get("State", state_id)
-    if stateObj is None:
+    stateGet = storage.get("State", state_id)
+    if stateGet is None:
         abort(404)
-    print(stateObj.name)
-    for k, v in objDict.items():
-        if k is not "id" and k is not "created_at"\
-           and k is not "updated_at":
-            setattr(stateObj, k, v)
-    stateObj.save()
-    print(stateObj.name)
-    return jsonify(stateObj.to_dict())
+    for k, v in data.items():
+        if k not in ['id', 'created_at', 'updated_at']:
+            setattr(stateGet, k, v)
+    stateGet.save()
+    return jsonify(stateGet.to_dict())
