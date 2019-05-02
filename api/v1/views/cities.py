@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 """holds class City"""
 from models.state import State
 from models.city import City
