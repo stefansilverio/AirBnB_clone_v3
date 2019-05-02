@@ -4,6 +4,7 @@ from models.state import State
 from flask import jsonify, abort, request
 from models import storage
 from api.v1.views import app_views
+from os import getenv
 
 
 @app_views.route("/states",
@@ -47,6 +48,27 @@ def state_post():
         storage.save()
         return jsonify(new_state.to_dict()), 201
     except TypeError:
-        abort(404, 'Not a json')
+        abort(400, 'Not a json')
     except KeyError:
-        abort(404, 'Missing name')
+        abort(400, 'Missing name')
+
+
+@app_views.route("/states/<state_id>",
+                 strict_slashes=False,
+                 methods=['PUT'])
+def state_put(state_id):
+    """Handles PUT request with state object with state id"""
+    objDict = request.get_json()
+    if objDict is None:
+        abort(400, 'Not a JSON')
+    stateObj = storage.get("State", state_id)
+    if stateObj is None:
+        abort(404)
+    print(stateObj.name)
+    for k, v in objDict.items():
+        if k is not "id" and k is not "created_at"\
+           and k is not "updated_at":
+            setattr(stateObj, k, v)
+    stateObj.save()
+    print(stateObj.name)
+    return jsonify(stateObj.to_dict())
