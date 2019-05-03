@@ -60,6 +60,7 @@ def place_post(city_id):
     if user_obj is None:
         abort(404)
     new_place = Place(**(user_data))
+    setattr(new_place, 'city_id', city_id)
     storage.new(new_place)
     storage.save()
     return jsonify(new_place.to_dict()), 201
