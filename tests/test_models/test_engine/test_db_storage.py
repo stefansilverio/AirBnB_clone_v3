@@ -138,17 +138,6 @@ class Db_Storage(unittest.TestCase):
         self.assertEqual(id, models.storage.get("State", id).id)
 
     @unittest.skipIf(models.storage_t != 'db', "testing db storage")
-    def test_get_count_empty(self):
-        """pass in no args"""
-        Base.metadata.drop_all(models.storage._DBStorage__engine)
-        Base.metadata.create_all(models.storage._DBStorage__engine)
-        models.storage.close()
-
-        example_state = State(name="At")
-        example_state.save()
-        self.assertEqual(1, models.storage.count())
-
-    @unittest.skipIf(models.storage_t != 'db', "testing db storage")
     def test_get_count(self):
         """count existing obj"""
 
@@ -165,6 +154,7 @@ class Db_Storage(unittest.TestCase):
         models.storage.new(example_city1)
         models.storage.save()
         self.assertEqual(3, models.storage.count())
+        self.assertEqual(0, models.storage.count("Schmoop"))
         self.assertEqual(2, models.storage.count("State"))
 
 
