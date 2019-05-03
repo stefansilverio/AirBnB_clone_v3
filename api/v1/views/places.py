@@ -41,15 +41,15 @@ def place_delete(place_id):
 
 
 @app_views.route("/cities/<city_id>/places", strict_slashes=False, methods=['POST'])
-def place_post():
+def place_post(city_id):
     """Handles POST request with place objects"""
     user_data = request.get_json()
     if user_data is None:
         abort(400, 'Not a JSON')
     if 'user_id' not in user_data.keys():
         abort(400, 'Missing user_id')
-    all_cities = storage.all("City").values()
-    if city_id not in all_cities:
+    city_obj = storage.get("City", city_id)
+    if city_obj is None:
         abort(404)
     new_place = Place(**(user_data))
     storage.new(new_place)
