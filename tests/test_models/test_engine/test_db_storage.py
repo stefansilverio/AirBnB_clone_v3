@@ -95,6 +95,40 @@ class Db_Storage(unittest.TestCase):
         self.assertEqual(None, models.storage.get("Tupac", 44))
 
     @unittest.skipIf(models.storage_t != 'db', "testing db storage")
+    def test_no_args(self):
+        """check if are no args passed to get"""
+        with self.assertRaises(TypeError):
+            models.storage.get()
+
+    @unittest.skipIf(models.storage_t != 'db', "testing db storage")
+    def test_one_args(self):
+        """check if one arg passed to get"""
+        with self.assertRaises(TypeError):
+            models.storage.get("State")
+        with self.assertRaises(TypeError):
+            models.storage.get(None)
+
+    @unittest.skipIf(models.storage_t != 'db', "testing db storage")
+    def test_id_one_args(self):
+        """pass one arg into get"""
+        example_state = State(name="splig")
+        example_state.save()
+        e_id = example_state.id
+        with self.assertRaises(TypeError):
+            models.storage.get(id=e_id)
+        with self.assertRaises(TypeError):
+            models.storage.get(id=666)
+
+    @unittest.skipIf(models.storage_t != 'db', "testing db storage")
+    def test_id_one_args_invalid(self):
+        """pass one valid one invalid"""
+        example_state = State(name="splig")
+        example_state.save()
+        e_id = example_state.id
+        self.assertEqual(None, models.storage.get("ragnar_danneskjöld", e_id))
+        self.assertEqual(None, models.storage.get("State", "666"))
+
+    @unittest.skipIf(models.storage_t != 'db', "testing db storage")
     def test_get_obj(self):
         """pass in existing obj"""
         example_state = State(name="rip")
@@ -102,6 +136,17 @@ class Db_Storage(unittest.TestCase):
         models.storage.save()
         id = example_state.id
         self.assertEqual(id, models.storage.get("State", id).id)
+
+    @unittest.skipIf(models.storage_t != 'db', "testing db storage")
+    def test_get_count_empty(self):
+        """pass in no args"""
+        Base.metadata.drop_all(models.storage._DBStorage__engine)
+        Base.metadata.create_all(models.storage._DBStorage__engine)
+        models.storage.close()
+
+        example_state = State(name="At")
+        example_state.save()
+        self.assertEqual(1, models.storage.count())
 
     @unittest.skipIf(models.storage_t != 'db', "testing db storage")
     def test_get_count(self):
