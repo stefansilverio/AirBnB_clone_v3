@@ -77,7 +77,7 @@ def place_put(place_id):
     if place_obj is None:
         abort(404)
     for k, v in user_data.items():
-        if k is not ["id", "created_at", "updated_at"]:
+        if k is not ["id", "created_at", "updated_at", "user_id", "city_id"]:
             setattr(place_obj, k, v)
     place_obj.save()
     return jsonify(place_obj.to_dict())
