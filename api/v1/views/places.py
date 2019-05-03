@@ -12,10 +12,11 @@ from os import getenv
                  methods=['GET'])
 def places_get_all(city_id):
     """Handle GET request for places"""
-    places = [place.to_dict() for place in storage.all("Place").values() if place.city_id == city_id]
-    if len(places) == 0:
+    cityGet = storage.get("City", city_id)
+    if cityGet is None:
         abort(404)
-    return jsonify(places)
+    return jsonify([place.to_dict() for place in cityGet.places])
+
 
 @app_views.route("/places/<place_id>")
 def places_get_one(place_id):
