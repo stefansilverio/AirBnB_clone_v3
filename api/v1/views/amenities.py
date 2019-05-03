@@ -11,7 +11,9 @@ from os import getenv
                  defaults={"amenity_id": None},
                  strict_slashes=False,
                  methods=['GET'])
-@app_views.route("/amenities/<amenity_id>", strict_slashes=False, methods=['GET'])
+@app_views.route("/amenities/<amenity_id>",
+                 strict_slashes=False,
+                 methods=['GET'])
 def amenity_get(amenity_id):
     """Handle GET request for amenities"""
     amenities = storage.all("Amenity").values()

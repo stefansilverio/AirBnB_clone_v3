@@ -26,6 +26,7 @@ def places_get_one(place_id):
         abort(404)
     return jsonify(place.to_dict())
 
+
 @app_views.route("/places/<place_id>",
                  strict_slashes=False,
                  methods=['DELETE'])
@@ -40,7 +41,9 @@ def place_delete(place_id):
         abort(404)
 
 
-@app_views.route("/cities/<city_id>/places", strict_slashes=False, methods=['POST'])
+@app_views.route("/cities/<city_id>/places",
+                 strict_slashes=False,
+                 methods=['POST'])
 def place_post(city_id):
     """Handles POST request with place objects"""
     user_data = request.get_json()
