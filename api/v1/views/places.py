@@ -49,10 +49,13 @@ def place_post(city_id):
     user_data = request.get_json()
     if user_data is None:
         abort(400, 'Not a JSON')
-    if 'user_id' not in user_data.keys():
+    if 'user_id' or 'name' not in user_data.keys():
         abort(400, 'Missing user_id')
     city_obj = storage.get("City", city_id)
     if city_obj is None:
+        abort(404)
+    user_obj = storage.get("User", user_id)
+    if user_obj is None:
         abort(404)
     new_place = Place(**(user_data))
     storage.new(new_place)
@@ -68,9 +71,6 @@ def place_put(place_id):
     user_data = request.get_json()
     if user_data is None:
         abort(400, 'Not a JSON')
-    all_places = storage.all("Place").values()
-    if place_id not in all_places:
-        abort(404)
     place_obj = storage.get("Place", place_id)
     if place_obj is None:
         abort(404)
